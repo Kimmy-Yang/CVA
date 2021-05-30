@@ -22,14 +22,14 @@
      
      
 **2. Switchback experiments**
-    ![](/image/1.PNG)
-    +：Algorithm changes that do not affect the UI
-      [A clear example] (https://medium.com/@DoorDash/switchback-tests-and-randomized-experimentation-under-network-effects-at-doordash-f1d938ab7c2a)
+
+  ![](/image/1.PNG)
+  * Algorithm changes that do not affect the UI
+  * [A clear example] (https://medium.com/@DoorDash/switchback-tests-and-randomized-experimentation-under-network-effects-at-doordash-f1d938ab7c2a)
       
 **3. Staged rollouts or quasi-experiments**
-      1. Treatment and control groups can be (quasirandomly) determined based on
-        * Location, team, project, etc.
-        * Randomization imperfections can be controlled ’synthetically’
-      
-      +： Testing a new policy in one or more cities, and constructing a ‘synthetic’ control city/cities from historical data and/or other cities 
+  1. Treatment and control groups can be (quasirandomly) determined based on
+      * Location, team, project, etc.
+      * Randomization imperfections can be controlled ’synthetically’
+  2. Testing a new policy in one or more cities, and constructing a ‘synthetic’ control city/cities from historical data and/or other cities 
       (Uber calls this ‘synthetic control’)
