@@ -2,4 +2,4 @@
 Creating Value with Analytics in 2021
 
 ## Materials Notes
-Note/ppt.md
+(https://github.com/Kimmy-Yang/CVA/blob/main/Note/ppt.md)
