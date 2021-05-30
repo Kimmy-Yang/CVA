@@ -11,14 +11,14 @@
 ## Types of experiments
 **1. A/B testing: Seperate the population (users) into Control Group and Treament Group**
 
-      * Product features
-      * Marketing messages
-      * Incentive spend
-      
-    _However_ , A/B testing is not always possible
-     1. Unable to unobtrusively assign to treatment and control groups
-     2. Network effects: The network effect is a phenomenon whereby increased numbers of people or participants improve the value of a good or service.）-> e.g.Internet,social media,
-     3. Spillover effects/contamination: Spillover effect refers to the impact that seemingly unrelated events in one nation can have on the economies of other nations.
+ * Product features
+ * Marketing messages
+ * Incentive spend
+
+**However** , A/B testing is not always possible
+  1. Unable to unobtrusively assign to treatment and control groups
+  2. Network effects: The network effect is a phenomenon whereby increased numbers of people or participants improve the value of a good or service.）-> e.g.Internet,social media,
+  3. Spillover effects/contamination: Spillover effect refers to the impact that seemingly unrelated events in one nation can have on the economies of other nations.
      
      
 **2. Switchback experiments**
