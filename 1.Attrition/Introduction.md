@@ -54,13 +54,14 @@ names(train)
 <details>
   <summary> Overview training </summary>
  
- ```{r, echo = FALSE} 
+ ```{r} 
  
 attrition_frame <- data.frame(
   group=c('True','False'),
   value=c(sum(train$attrition==TRUE),
           sum(train$attrition==FALSE))
 )
+                   
 ggplot(attrition_frame,aes(x="", y=value, fill=group,)) +
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0) +
