@@ -1,0 +1,444 @@
+---
+title: "Attrition Project"
+author: "Jiaqi Yang"
+date: "2021/6/1"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+# I. Summary
+
+### Background:
+
+Employees are the key to a company.
+Employee attrition refers to a gradual but deliberate reduction in staff number due to employees retire or resign.
+Yet, it is not replaced, as an employer will not fill the vacancy left by the former employee.
+Frequently, from an organization perspective, a high employee attrition rate is not ideal, because it:
+
+-   wastes the cost in recruiting, assessing, hiring, and training the person
+
+-   makes the company lose the experienced employees
+
+-   lows workplace morale
+
+By analyzing and predicting the attrition, the company can know why employees leave the company and identify potential actions to reduce employee attrition.
+
+### Objectives
+
+-   Investigate the factors that drive employee attrition
+
+-   Predict employee attrition
+
+-   Discuss how to use the prediction results in practice
+
+### Methodology
+
+-   Logistic regression
+
+-   Random forest
+
+# II. Exploratory Data Analysis
+
+<details>
+
+<summary>
+
+import data set & split training and testing data
+
+</summary>
+
+```{r, echo = FALSE}
+
+# Load
+
+library(readr)
+library(caret)
+library(ggplot2)
+library(ggpubr)
+library(plyr)
+library(pROC)
+library(randomForest)
+
+```
+
+### 2.1 Loading the data set
+
+```{r}
+Employee_attrition_dataset <- read_csv("Employee attrition dataset.csv")
+head(Employee_attrition_dataset)
+```
+
+### 2.2 Check for missing data
+
+```{r}
+sum(is.na(Employee_attrition_dataset))
+```
+
+### 2.3 Data split to training and testing
+
+I took 80% for the training part.
+
+```{r}
+set.seed(31)
+indeces <- sample(nrow(Employee_attrition_dataset),nrow(Employee_attrition_dataset)*0.8)
+
+train <- Employee_attrition_dataset[indeces,]
+test <- Employee_attrition_dataset[-indeces,]
+
+```
+
+</details>
+
+## 2.4 Overview
+
+```{r}
+summary(train)
+summary(test)
+
+```
+
+```{r, echo = FALSE}
+library(wesanderson) 
+attrition_frame <- data.frame(
+  group=c('True','False'),
+  value=c(sum(train$attrition==TRUE),
+          sum(train$attrition==FALSE))
+)
+attrition_frame2 <- data.frame(
+  group=c('True','False'),
+  value=c(sum(test$attrition==TRUE),
+          sum(test$attrition==FALSE))
+)  
+                   
+plot_train <- ggplot(attrition_frame,aes(x="", y=value, fill=group)) +
+  geom_bar(stat="identity", width=1)+
+  coord_polar("y", start=0) +
+  scale_fill_brewer(palette="Spectral")+
+  theme_bw()
+
+plot_test <- ggplot(attrition_frame2,aes(x="", y=value, fill=group)) +
+  geom_bar(stat="identity", width=1)+
+  coord_polar("y", start=0) +
+  scale_fill_brewer(palette="Spectral")+
+  theme_bw()
+
+figure <- ggarrange(plot_train, plot_test, 
+                    labels=c("Train","Test"),
+                    nrow=1, ncol=2)
+figure
+#scale_color_manual(values=wes_palette("GrandBudapest2",2))
+# scale_fill_manual( values = c( "#E46726","#6D9EC1"))
+#scale_fill_manual(values=wes_palette("GrandBudapest2"))
+```
+
+```{r, echo=FALSE}
+# check how different factors correlate with each other, 
+# I cleaned the categorical and binary data out
+
+train_a <- train[c(1:2,5:10)]
+
+#View(train_a)
+
+correlations <- cor(train_a)
+
+
+# interactive visualization
+library(ggcorrplot)
+
+ggcorrplot(correlations,method="circle",
+           ggtheme = ggplot2::theme_bw,
+           colors = c("#6D9EC1", "white", "#E46726"))+
+  labs(title="Variables Correlation") 
+  
+
+#colors = c("#6D9EC1", "white", "#E46726"))
+```
+
+It can be concluded that attrition positively correlates with overtime, but negatively with performance, training spends and boss rating.
+
+# III. Logistic regression
+
+### 3.1 Build the model
+
+As there are categorical dependent variables, I build a logistic regression using the training data set.
+
+```{r}
+fit_logistic <- glm(attrition ~., family=binomial(logit),
+                    data = train, maxit=1000)
+summary(fit_logistic)
+
+fit_logistic1 <- glm(attrition ~.-job_title - gender_male - salary, family=binomial(logit),
+                     data = train, maxit=1000)
+summary(fit_logistic1)
+
+sig_coeff <- fit_logistic$coefficients[ summary(fit_logistic)$coefficients[,4] < .05]
+sig_coeff
+sig_coeff <- data.frame(b=round(sig_coeff,2), exp_b=round(exp(sig_coeff),2)); sig_coeff
+
+```
+
+In short, the fit_logistic1 model is developed from the first model, by eliminating insignificant attributes.
+It performs better, with a smaller AIC (AIC = 1500.2.) Yet, instead of excluding the variable of job title, it is a good idea to separate it by seniority and see how the length of time working in a company can influence employee attrition.
+Besides, the performance rating is discrete, so it might be the case that different levels of rating have a different impact on attrition.
+
+```{r}
+
+tr_d <- train
+te_d <- test
+
+tr_d$seniority <- tr_d$job_title == "Lead designer" | tr_d$job_title == "Lead developer" | tr_d$job_title == "Principal consultant" | tr_d$job_title == "Senior designer" | tr_d$job_title == "Senior developer"
+te_d$seniority <- te_d$job_title == "Lead designer" | te_d$job_title == "Lead developer" | te_d$job_title == "Principal consultant" | te_d$job_title == "Senior designer" | te_d$job_title == "Senior developer"
+tr_d <- tr_d[,-4]
+te_d <- te_d[,-4]
+#View(tr_d)
+
+tr_d$performance_rating <- as.factor(tr_d$performance_rating)
+te_d$performance_rating <- as.factor(te_d$performance_rating)
+
+# View(tr_d)
+
+fit_logistic2 <- glm(attrition ~ . - gender_male - salary, family = binomial(logit), data= tr_d, maxit=1000)
+summary(fit_logistic2)
+
+fit_logistic3 <- glm(attrition ~ . - gender_male - salary - seniority, family = binomial(logit), data= tr_d, maxit=1000)
+summary(fit_logistic3)
+
+```
+
+Now, the model 2 seems better, with a lower AIC (1489.7.)
+
+# IV. Random Forest
+
+## 4.1 Build the model
+
+```{r}
+model_forest1 <- randomForest(attrition ~ ., data=train,
+                              method="class", ntree=500)
+
+
+model_forest2 <- randomForest(attrition~.-job_title - gender_male - salary, data=train, method="class", ntree=500)
+
+
+par(mfrow=c(1,2))
+plot(model_forest1, main="random forest 1")
+plot(model_forest2, main="random forest 2")
+
+
+```
+
+# V. Predict the result
+
+```{r}
+# Check the prediction for the 3rd model
+predictions_logistic_3 <-  predict(fit_logistic3, newdata = te_d, type = 'response')
+
+#head(round(predictions_logistic,4))
+#head(te_d$attrition)
+
+#confusion matrix
+conf_matrix <- confusionMatrix(as.factor(te_d$attrition==1), 
+                                data=as.factor(predictions_logistic_3 > 0.5), positive="TRUE") 
+ctable3 <-  conf_matrix$table
+
+
+#comparing with other models
+
+# no kick out
+predictions_logistic_0 <-  predict(fit_logistic, newdata = test, type = 'response')
+
+conf_matrix_0 <- confusionMatrix(as.factor(test$attrition==1), 
+                                data=as.factor(predictions_logistic_0 > 0.5), positive="TRUE") 
+ctable0 <-  conf_matrix_0$table
+
+# kick out everything
+predictions_logistic_1<-  predict(fit_logistic1, newdata = test, type = 'response')
+conf_matrix_1 <- confusionMatrix(as.factor(test$attrition==1),
+                                  data=as.factor(predictions_logistic_1>0.5), positive='TRUE')
+ctable1 <-  conf_matrix_1$table
+# 2
+predictions_logistic_2<-  predict(fit_logistic2, newdata = te_d, type = 'response')
+conf_matrix_2 <- confusionMatrix(as.factor(te_d$attrition==1),
+                                  data=as.factor(predictions_logistic_2>0.5), positive='TRUE')
+ctable2 <-  conf_matrix_2$table
+
+
+prediction_forest1 <- predict(model_forest1, newdata = test, type = 'class')
+conf_matrix_21 <- confusionMatrix(as.factor(test$attrition==1),
+                                  data=as.factor(prediction_forest1 >0.5), positive='TRUE')
+ctable21 <-  conf_matrix_21$table
+
+#conf_matrix_21
+
+prediction_forest2 <- predict(model_forest2, newdata = test, type = 'class')
+conf_matrix_22 <- confusionMatrix(as.factor(test$attrition==1),
+                                  data=as.factor(prediction_forest2 >0.5), positive='TRUE')
+#conf_matrix_22
+ctable22 <-  conf_matrix_22$table
+```
+
+# VI. Analyze the predictions
+
+You can see the Confusion Matrix below, with a threshold of 0.5.
+And then, I compared the key results into a histogram.
+It seems that random forest performed the best.
+Finally, ROC plots suggest that the second model of the random forest is the best, as it has the largest AUC.
+
+```{r, echo=FALSE}
+# visualization
+par(mfrow=c(2,3))
+plot0 <- fourfoldplot(ctable0, color = c("#fff7bc","#d95f0e"),
+             conf.level = 0, margin = 1, main = "log 0")
+plot1 <- fourfoldplot(ctable1, color = c("#fff7bc","#d95f0e"),
+             conf.level = 0, margin = 1, main = "log 1")
+plot2 <- fourfoldplot(ctable2, color = c("#fff7bc","#d95f0e"),
+             conf.level = 0, margin = 1, main = "log 2")
+plot3 <- fourfoldplot(ctable3, color = c("#fff7bc","#d95f0e"),
+             conf.level = 0, margin = 1, main = "log 3")
+plot4 <- fourfoldplot(ctable21, color = c("#fff7bc","#d95f0e"),
+             conf.level = 0, margin = 1, main = "forest 1")
+
+plot5 <- fourfoldplot(ctable22, color = c("#fff7bc","#d95f0e"),
+             conf.level = 0, margin = 1, main = "forest 2")
+
+#create df 
+Accuracy0 <- 0.8093
+Sensitivity0 <- round(0.12658,2)
+Specificity0 <- round(0.96296,2)
+
+Accuracy1 <- 0.814
+Sensitivity1 <- round(0.08861,2)
+Specificity1 <- round(0.97721,2)
+
+Accuracy2 <- 0.8163
+Sensitivity2 <- round(0.13924,2)
+Specificity2 <- round(0.96866,2)
+ 
+Accuracy3 <- 0.814
+Sensitivity3 <- round(0.13924,2)
+Specificity3 <- round(0.96581,2)
+
+Accuracy4 <- 0.8209
+Sensitivity4 <- round(0.21519,2)
+Specificity4 <- round(0.95726,2)
+
+Accuracy5 <- 0.8279
+Sensitivity5 <- round(0.26582,2)
+Specificity5 <- round(0.95442,2)
+
+accuracy <- c(Accuracy0,Accuracy1,Accuracy2,Accuracy3,Accuracy4,Accuracy5)
+sensitivity <- c(Sensitivity0,Sensitivity1,Sensitivity2,Sensitivity3,Sensitivity4,Sensitivity5)
+specificity <- c(Specificity0,Specificity1,Specificity2,Specificity3,Specificity4,Specificity5)
+
+condition <- rep(c('log_0','log_l','log_2','log_3','forest_1','forest_2'),3)
+
+type <- c(rep('accuracy',6),rep('sensitivity',6),rep('specificity',6))
+#type
+value <- c(accuracy,sensitivity,specificity)
+#value
+data <- data.frame(condition,type,value)
+data
+
+ggplot(data,aes(fill=condition, y=value, x=type))+
+  geom_bar(position="dodge", stat="identity") +
+  scale_fill_brewer(palette = "RdYlGn")+
+  geom_hline(yintercept=c(0.8279,0.26582,0.95442), linetype="dashed",
+             color="#6D9EC1", size=1)+
+  theme_bw()
+
+
+#sensitivity= true positives/ (true positives + false negatives)
+#specificity =  true negatives/ (true negatives+ false positives)
+
+##
+#ac_vl <- c(Accuracy0,Accuracy1,Accuracy2,Accuracy3)
+#co_df <- c('model_0','mode_l','model_2','model_3')
+#data_1 <- data.frame(ac_vl,co_df)
+
+
+#scale_fill_brewer(palette="Spectral")
+#ggplot(data=data_1, aes(x=co_df, y=ac_vl))+
+  #geom_bar(stat="identity")+
+  #scale_fill_manual(values=wes_palette("GrandBudapest2",4))
+
+##
+
+##ROC
+par(mfrow=c(2,3))
+{
+plot.roc(test$attrition, predictions_logistic_0,
+         percent=TRUE, main="model 0",
+         ci=TRUE, of ="thresholds",thresholds="best",print.thres="best")
+  
+plot.roc(test$attrition, predictions_logistic_1,
+         percent=TRUE, main="model 1",
+         ci=TRUE, of ="thresholds",thresholds="best",print.thres="best")  
+
+plot.roc(te_d$attrition, predictions_logistic_2,
+         percent=TRUE, main="model 2",
+         ci=TRUE, of ="thresholds",thresholds="best",print.thres="best")
+
+plot.roc(te_d$attrition, predictions_logistic_3,
+         percent=TRUE, main="model 3",
+         ci=TRUE, of ="thresholds",thresholds="best",print.thres="best")
+
+plot.roc(test$attrition, prediction_forest1,
+         percent=TRUE, main="forest 1",
+         ci=TRUE, of ="thresholds",thresholds="best",print.thres="best")
+
+plot.roc(test$attrition, prediction_forest2,
+         percent=TRUE, main="forest 2",
+         ci=TRUE, of ="thresholds",thresholds="best",print.thres="best")
+}
+
+
+## Then combine together
+
+roc0 <- plot.roc(test$attrition,predictions_logistic_0,
+                 main="Statistical Comparison",
+                 percent=TRUE,
+                 col="#fff7bc")
+
+
+roc1 <- lines.roc(test$attrition,predictions_logistic_1,
+                 percent=TRUE,
+                 col="#fec44f")
+
+roc2 <- lines.roc(te_d$attrition,predictions_logistic_2,
+                 percent=TRUE,
+                 col="#d95f0e")
+
+roc3 <- lines.roc(te_d$attrition,predictions_logistic_3,
+                 percent=TRUE,
+                 col="#31a354")
+roc4 <- lines.roc(test$attrition,prediction_forest1,
+                 percent=TRUE,
+                 col="#a8ddb5")
+roc5 <- lines.roc(test$attrition,prediction_forest2,
+                 percent=TRUE,
+                 col="#8856a7")
+
+legend("bottomright", legend=c("logistic 0","logistic 1","logistic 2","logistic 3","forest 1","forest 2" ),
+       col=c("#fff7bc","#fec44f","#d95f0e","#31a354","#a8ddb5","#8856a7"),
+       lwd=3)
+
+```
+
+# VII. Conclusion:
+
+The second random forest model gives the best prediction.
+Yet, the company needs to evaluate between type I error and type II error, and consider which type of error is the most unacceptable.
+The model shows that $job_title$,$gender$,$salary$ are not essentially relevant to employee attrition.
+In other words, those factors cannot make an employee stay in the company.
+The model and results are useful for the top management team and HR.
+
+1.  HR: - can prepare actions to retain the employees.
+    For example, HR may arrange a face-to-face conversation to identify the reasons.
+    So if it turns out that they think the traveling days are overwhelming, HR can inform the supervisor and suggest reorganizing the working schedule slightly.
+    - can prepare for the next round of recruitment.
+    If the company can find someone else to replace the position, the attrition will become normal employee turnover.
+
+2.  top management team: - As the results show that both $training_spend$ and $boss_rating_avg$ are one of the factors to attrition, the top management can balance the overall company profits and decide the increase the employee spend in the next year.
+    - Besides, the top management team can have another project to identify how to improve the boss rating.
+    - Since employees prefer to stay in a company without an obvious hierarchy, the top manager can evaluate and improve the company culture to become more transparent and agile.
