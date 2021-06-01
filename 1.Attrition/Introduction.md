@@ -22,19 +22,23 @@ The objectives include :
 
 <details>
   <summary>import dataset</summary>
- ```{r, echo = FALSE}
+ 
+```{r, echo = FALSE}
 library(readr)
 library(caret)
-
-# 1.1 Loading the data set
+```
+### 1.1 Loading the data set ###
+```{r, echo = FALSE}
 Employee_attrition_dataset <- read_csv("Employee attrition dataset.csv")
-# View(Employee_attrition_dataset)
-
-# 1.2 Check for missing data
+View(Employee_attrition_dataset)
+```
+### 1.2 Check for missing data ###
+```{r, echo = FALSE}                             
 sum(is.na(Employee_attrition_dataset))
-
-# 1.3 Data split to training and testing 
-# I took 80% for the training part
+```
+#### 1.3 Data split to training and testing ###
+I took 80% for the training part
+```{r, echo = FALSE}                             
 set.seed(31)
 indeces <- sample(nrow(Employee_attrition_dataset),nrow(Employee_attrition_dataset)*0.8)
 
