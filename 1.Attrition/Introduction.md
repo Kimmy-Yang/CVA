@@ -1,5 +1,5 @@
 # Background: #
-## :briefcase: Attrition in a Company ##
+### :briefcase: Attrition in a Company ###
 Employees are the key to company. Employee attrtion refers to a gradual but deliberate reduction in staff number due to employees retire or resign. Yet, it is not replaced, as an employer will not fill the vacancy left by the former employee. Frequently, from an organizationl perspective, high employee attrtion rate is not ideal, because it:
   * wastes the cost in recruiting, assesing, hiring and training the person
   * makes company loss the experienced employees
@@ -8,7 +8,7 @@ Employees are the key to company. Employee attrtion refers to a gradual but deli
 By analyzing and predicting the attrtion, the company can know why employees leave the company and identify potential actions to reduce employee attrtion.
 
 # Objectives #
-## :mag_right: Why employees leave? ##
+### :mag_right: Why employees leave? ###
 The objectives include :
   * Investigate the factors drive to employee attrtion
   * Predict employee attrtion
@@ -17,3 +17,31 @@ The objectives include :
 # Methodology #
 * logistic regression
 * Random forest
+
+# :one: An overview of the dataset #
+
+<details>
+  <summary>import dataset</summary>
+ ```{r, echo = FALSE}
+library(readr)
+library(caret)
+
+# 1.1 Loading the data set
+Employee_attrition_dataset <- read_csv("Employee attrition dataset.csv")
+# View(Employee_attrition_dataset)
+
+# 1.2 Check for missing data
+sum(is.na(Employee_attrition_dataset))
+
+# 1.3 Data split to training and testing 
+# I took 80% for the training part
+set.seed(31)
+indeces <- sample(nrow(Employee_attrition_dataset),nrow(Employee_attrition_dataset)*0.8)
+
+train <- Employee_attrition_dataset[indeces,]
+test <- Employee_attrition_dataset[-indeces,]
+
+summary(train)
+names(train)
+```
+</details>
