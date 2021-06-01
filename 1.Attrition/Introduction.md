@@ -27,6 +27,7 @@ The objectives include :
 library(readr)
 library(caret)
 library(ggplot2)
+library(plyr)
 ```
 ### 1.1 Loading the data set ###
 ```{r, echo = FALSE}
