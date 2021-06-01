@@ -55,8 +55,7 @@ names(train)
 <details>
   <summary> Overview training </summary>
  
- ```{r global_options}
-knitr::opts_chunk$set(fig.path='Figs/') 
+ ```{r ggplot2ex}
  
 attrition_frame <- data.frame(
   group=c('True','False'),
