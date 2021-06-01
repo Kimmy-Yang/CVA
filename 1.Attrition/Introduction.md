@@ -21,11 +21,12 @@ The objectives include :
 # :one: An overview of the dataset #
 
 <details>
-  <summary>import dataset</summary>
+  <summary>import dataset & split training and testing data</summary>
  
 ```{r, echo = FALSE}
 library(readr)
 library(caret)
+library(ggplot2)
 ```
 ### 1.1 Loading the data set ###
 ```{r, echo = FALSE}
@@ -49,3 +50,24 @@ summary(train)
 names(train)
 ```
 </details>
+
+<details>
+  <summary> Overview training </summary>
+ ```{r, echo = FALSE} 
+ 
+attrition_frame <- data.frame(
+  group=c('True','False'),
+  value=c(sum(train$attrition==TRUE),
+          sum(train$attrition==FALSE))
+)
+
+
+ggplot(attrition_frame,aes(x="", y=value, fill=group,)) +
+  geom_bar(stat="identity", width=1)+
+  coord_polar("y", start=0) +
+  scale_fill_manual( values = c( "#E46726","#6D9EC1")) +
+  theme_bw()
+
+ 
+ ```
+ </details>
