@@ -69,4 +69,7 @@ ggplot(attrition_frame,aes(x="", y=value, fill=group,)) +
   scale_fill_manual( values = c( "#E46726","#6D9EC1")) +
   theme_bw()
  ```
+                   
+  code()
+                   
  </details>
