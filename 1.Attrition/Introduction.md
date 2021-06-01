@@ -37,7 +37,7 @@ View(Employee_attrition_dataset)
 ```{r, echo = FALSE}                             
 sum(is.na(Employee_attrition_dataset))
 ```
-#### 1.3 Data split to training and testing ###
+### 1.3 Data split to training and testing ###
 I took 80% for the training part
 ```{r, echo = FALSE}                             
 set.seed(31)
@@ -53,6 +53,7 @@ names(train)
 
 <details>
   <summary> Overview training </summary>
+ 
  ```{r, echo = FALSE} 
  
 attrition_frame <- data.frame(
@@ -60,14 +61,10 @@ attrition_frame <- data.frame(
   value=c(sum(train$attrition==TRUE),
           sum(train$attrition==FALSE))
 )
-
-
 ggplot(attrition_frame,aes(x="", y=value, fill=group,)) +
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0) +
   scale_fill_manual( values = c( "#E46726","#6D9EC1")) +
   theme_bw()
-
- 
  ```
  </details>
