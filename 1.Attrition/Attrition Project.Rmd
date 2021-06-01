@@ -2,7 +2,7 @@
 title: "Attrition Project"
 author: "Jiaqi Yang"
 date: "2021/6/1"
-output: html_document
+output: rmarkdown::github_document
 editor_options: 
   markdown: 
     wrap: sentence
