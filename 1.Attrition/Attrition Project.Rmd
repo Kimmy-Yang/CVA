@@ -2,7 +2,7 @@
 title: "Attrition Project"
 author: "Jiaqi Yang"
 date: "2021/6/1"
-output: html_document
+output: rmarkdown::github_document
 editor_options: 
   markdown: 
     wrap: sentence
@@ -40,14 +40,6 @@ By analyzing and predicting the attrition, the company can know why employees le
 -   Random forest
 
 # II. Exploratory Data Analysis
-
-<details>
-
-<summary>
-
-import data set & split training and testing data
-
-</summary>
 
 ```{r, echo = FALSE}
 
@@ -433,12 +425,11 @@ The model shows that $job_title$,$gender$,$salary$ are not essentially relevant 
 In other words, those factors cannot make an employee stay in the company.
 The model and results are useful for the top management team and HR.
 
-1.  HR: - can prepare actions to retain the employees.
-    For example, HR may arrange a face-to-face conversation to identify the reasons.
-    So if it turns out that they think the traveling days are overwhelming, HR can inform the supervisor and suggest reorganizing the working schedule slightly.
-    - can prepare for the next round of recruitment.
-    If the company can find someone else to replace the position, the attrition will become normal employee turnover.
+1.  HR: - can prepare actions to retain the employees. For example, HR may arrange a face-to-face conversation to identify the reasons. So if it turns out that they think the traveling days are overwhelming, HR can inform the supervisor and suggest reorganizing the working schedule slightly.
+
+    -   can prepare for the next round of recruitment. If the company can find someone else to replace the position, the attrition will become normal employee turnover.
 
 2.  top management team: - As the results show that both $training_spend$ and $boss_rating_avg$ are one of the factors to attrition, the top management can balance the overall company profits and decide the increase the employee spend in the next year.
-    - Besides, the top management team can have another project to identify how to improve the boss rating.
-    - Since employees prefer to stay in a company without an obvious hierarchy, the top manager can evaluate and improve the company culture to become more transparent and agile.
+
+    -   Besides, the top management team can have another project to identify how to improve the boss rating.
+    -   Since employees prefer to stay in a company without an obvious hierarchy, the top manager can evaluate and improve the company culture to become more transparent and agile.
