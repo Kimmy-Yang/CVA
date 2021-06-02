@@ -1,4 +1,4 @@
-:mag:Attrition Project
+:mag:Attrition Project :running:
 ================
 Jiaqi Yang
 2021/6/1
