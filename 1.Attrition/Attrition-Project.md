@@ -40,13 +40,6 @@ employee attrition.
 
 # II. Exploratory Data Analysis
 
-<details>
-<summary>
-
-import data set & split training and testing data
-
-</summary>
-
     ## Loading required package: lattice
 
     ## Loading required package: ggplot2
