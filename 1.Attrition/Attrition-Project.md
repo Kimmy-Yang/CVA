@@ -1,4 +1,4 @@
-:mag:Attrition Project :running:
+:running: Attrition Project 
 ================
 Jiaqi Yang
 2021/6/1
@@ -34,11 +34,19 @@ employee attrition.
 
 ### Methodology
 
+Machine Learning Models:
+
 -   Logistic regression
 
 -   Random forest
 
-# II. Exploratory Data Analysis
+Valuation Models:
+
+-   Confusion Matrix
+
+-   ROC & AUC
+
+# II. :chart_with_upwards_trend: Exploratory Data Analysis
 
     ## Loading required package: lattice
 
